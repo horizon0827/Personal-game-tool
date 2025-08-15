@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>个人游戏小工具</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --card: #121824;
+      --muted: #8aa0b4;
+      --fg: #dbe7f3;
+      --accent: #66d9ef;
+      --accent-2: #a6e22e;
+      --danger: #ff6b6b;
+      --ok: #2ecc71;
+      --warn: #f1c40f;
+      --border: #1e2a3a;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    html, body { background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
+    * { box-sizing: border-box; }
+    .container { max-width: 1100px; margin: 32px auto; padding: 0 16px; }
+    header { display:flex; flex-wrap:wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    header h1 { font-size: clamp(22px, 3vw, 30px); margin: 0; letter-spacing: .5px; }
+    header .actions { display:flex; gap: 8px; flex-wrap: wrap; }
+    button, .btn { cursor: pointer; background: linear-gradient(180deg,#1b2738,#101827); border: 1px solid var(--border); color: var(--fg); padding: 10px 14px; border-radius: 12px; box-shadow: var(--shadow); transition: transform .05s ease, filter .2s ease; font-weight: 600; }
+    button:hover { filter: brightness(1.05); }
+    button:active { transform: translateY(1px); }
+    .btn-secondary { background: #0f1624; }
+    .btn-danger { background: #2a1214; border-color: #5a1e22; color: #ffb3b3 }
+
+    .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .card { grid-column: span 12; background: linear-gradient(180deg, #101827, #0f1522); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+    @media (min-width: 980px) {
+      .card { grid-column: span 6; }
+      .card.full { grid-column: span 12; }
+    }
+    .card h2 { margin: 0 0 12px; font-size: 20px; display:flex; align-items:center; gap:8px }
+    .subtitle { color: var(--muted); font-size: 12px; margin-top: -4px; margin-bottom: 10px; }
+
+    .row { display:grid; grid-template-columns: repeat(12,1fr); gap: 10px; align-items: center; margin-bottom: 10px; }
+    .row > label { grid-column: span 4; color: var(--muted); font-size: 14px; }
+    .row > input, .row > select { grid-column: span 8; }
+    input[type="number"], input[type="text"], input[type="datetime-local"], select { width: 100%; background: #0b1220; border: 1px solid var(--border); color: var(--fg); padding: 10px 12px; border-radius: 12px; outline: none; }
+    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .total { margin-top: 10px; font-size: 16px; font-weight: 700; letter-spacing: .2px; }
+    .total .num { color: var(--accent-2); }
+    .total .detail { color: var(--muted); font-weight: 500; font-size: 12px; }
+
+    .hr { height: 1px; background: var(--border); margin: 12px 0; border-radius: 1px; }
+
+    .activity-controls { display:grid; grid-template-columns: 1fr 1fr 1fr auto auto; gap: 8px; align-items: center; margin-bottom: 12px; }
+    .activity-list { display:grid; gap: 12px; }
+
+    .activity { border: 1px dashed #2a3a55; border-radius: 14px; padding: 14px; background: #0c1322; }
+    .activity .header { display:flex; flex-wrap: wrap; align-items:center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+    .badge { font-size: 12px; color: #9cb3c7; background: #0c1a2a; padding: 4px 8px; border: 1px solid #203048; border-radius: 999px; }
+    .overdue { color: var(--danger); }
+    .soon { color: var(--warn); }
+    .ok { color: var(--ok); }
+
+    .fine { font-size: 12px; color: var(--muted); }
+    footer { margin-top: 24px; text-align: center; color: var(--muted); font-size: 12px; }
+    .muted { color: var(--muted); }
+    .flex { display:flex; gap: 8px; flex-wrap: wrap; align-items:center; }
+
+    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    .toolbar { display:flex; gap: 8px; align-items:center; flex-wrap: wrap; }
+    input[type="file"] { display:none; }
+    .file-label { border: 1px dashed var(--border); padding: 10px 12px; border-radius: 12px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>个人游戏小工具 <span class="subtitle">（本地保存 · 支持导出 / 导入 JSON 手动同步）</span></h1>
+      <div class="toolbar">
+        <button id="exportBtn">导出 JSON</button>
+        <label for="importFile" class="file-label">导入 JSON</label>
+        <input id="importFile" type="file" accept="application/json" />
+        <button id="clearBtn" class="btn-danger">清空所有数据（慎用）</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- 区域1：明日方舟攒抽计算器 -->
+      <section class="card" id="arknightsCard">
+        <h2>明日方舟攒抽计算器</h2>
+        <div class="row">
+          <label for="ak_YS">合成玉</label>
+          <input id="ak_YS" type="number" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="row">
+          <label for="ak_OR">源石</label>
+          <input id="ak_OR" type="number" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="row">
+          <label for="ak_T10">十连寻访凭证</label>
+          <input id="ak_T10" type="number" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="row">
+          <label for="ak_T1">寻访凭证</label>
+          <input id="ak_T1" type="number" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="total">合计共 <span id="ak_total" class="num">0.00</span> 抽
+          <div class="detail">计算：(<span id="ak_detail" class="mono">0</span>)</div>
+        </div>
+      </section>
+
+      <!-- 区域2：崩坏星穹铁道攒抽计算器 -->
+      <section class="card" id="hsrCard">
+        <h2>崩坏：星穹铁道攒抽计算器</h2>
+        <div class="row">
+          <label for="hsr_SC">星琼</label>
+          <input id="hsr_SC" type="number" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="row">
+          <label for="hsr_T">星轨专票</label>
+          <input id="hsr_T" type="number" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="total">合计共 <span id="hsr_total" class="num">0.00</span> 抽
+          <div class="detail">计算：(<span id="hsr_detail" class="mono">0</span>)</div>
+        </div>
+      </section>
+
+      <!-- 区域3：奇迹暖暖活动计算器（整卡宽度） -->
+      <section class="card full" id="nikkiCard">
+        <h2>奇迹暖暖活动计算器</h2>
+        <div class="hint">时间默认为<b>中国北京时间（UTC+8）</b>。倒计时以当前设备时间为准。</div>
+
+        <div class="activity-controls">
+          <select id="activitySelect" title="已创建的活动">
+            <option value="" disabled selected>— 选择一个活动 —</option>
+          </select>
+          <input id="activityNameInput" type="text" placeholder="新活动名称" />
+          <button id="addActivityBtn">增加</button>
+          <button id="deleteSelectedActivityBtn" class="btn-danger">删除所选</button>
+          <span class="fine">（下拉选择 + 输入框 + 增加 / 删除）</span>
+        </div>
+
+        <div class="activity-list" id="activityList"></div>
+
+        <div class="hint">说明：
+          <ul>
+            <li>预计每天需要道具 = （目标 - 已有） / 剩余天数</li>
+            <li>预计还需要次数 = （目标 - 已有） / 一次可获得道具数量</li>
+            <li>每天需要次数 = 上式 / 剩余天数</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      © <span id="year"></span> 个人游戏小工具 · 数据保存在浏览器 localStorage · 可导出 JSON 手动同步
+    </footer>
+  </div>
+
+  <script>
+    /*********************
+     * 通用：本地存储 & 导入导出
+     *********************/
+    const STORAGE_KEY = 'personalGameToolsDataV1';
+
+    const initialState = {
+      arknights: { YS: 0, OR: 0, T10: 0, T1: 0 },
+      hsr: { SC: 0, T: 0 },
+      nikki: {
+        activities: [ /* { id, name, deadlineEpoch, current, target, perRun } */ ]
+      }
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(initialState);
+        const parsed = JSON.parse(raw);
+        // 合并缺失字段（向前兼容）
+        return deepMerge(structuredClone(initialState), parsed);
+      } catch (e) {
+        console.error('读取本地存储失败，使用初始状态', e);
+        return structuredClone(initialState);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function deepMerge(base, extra) {
+      for (const k in extra) {
+        if (extra[k] && typeof extra[k] === 'object' && !Array.isArray(extra[k])) {
+          base[k] = deepMerge(base[k] ?? {}, extra[k]);
+        } else {
+          base[k] = extra[k];
+        }
+      }
+      return base;
+    }
+
+    function download(filename, text) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    /*********************
+     * 时间 & 时区（北京：UTC+8）
+     *********************/
+    const BEIJING_OFFSET_MIN = 8 * 60; // 固定 +08:00，无夏令时
+
+    // 将 "YYYY-MM-DDTHH:mm"（北京本地时间）转换为 UTC epoch 毫秒
+    function bjLocalStringToEpoch(str) {
+      // 安全解析：按本地数字拆分
+      const [date, time] = str.split('T');
+      if (!date || !time) return Date.now();
+      const [y, m, d] = date.split('-').map(Number);
+      const [hh, mm] = time.split(':').map(Number);
+      // 先得到北京时区的“假设 UTC”时间，再减去8小时得到真实 UTC
+      const epochUTC = Date.UTC(y, (m - 1), d, hh, mm);
+      const epochReal = epochUTC - BEIJING_OFFSET_MIN * 60 * 1000; // 减去 8 小时
+      return epochReal;
+    }
+
+    // 将 UTC epoch 毫秒转成 "YYYY-MM-DDTHH:mm"（北京本地时间）
+    function epochToBjLocalString(epoch) {
+      const t = new Date(epoch + BEIJING_OFFSET_MIN * 60 * 1000); // 加 8 小时再按 UTC 取字段
+      const y = t.getUTCFullYear();
+      const m = String(t.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(t.getUTCDate()).padStart(2, '0');
+      const hh = String(t.getUTCHours()).padStart(2, '0');
+      const mm = String(t.getUTCMinutes()).padStart(2, '0');
+      return `${y}-${m}-${d}T${hh}:${mm}`;
+    }
+
+    function formatCountdown(ms) {
+      if (ms <= 0) return { text: '0天 00:00:00', cls: 'overdue' };
+      const totalSec = Math.floor(ms / 1000);
+      const days = Math.floor(totalSec / 86400);
+      const rem = totalSec % 86400;
+      const hh = String(Math.floor(rem / 3600)).padStart(2, '0');
+      const mm = String(Math.floor((rem % 3600) / 60)).padStart(2, '0');
+      const ss = String(rem % 60).padStart(2, '0');
+      // 近 3 天提示为 soon
+      const cls = ms < 3 * 86400 * 1000 ? 'soon' : 'ok';
+      return { text: `${days}天 ${hh}:${mm}:${ss}`, cls };
+    }
+
+    /*********************
+     * 状态 & 事件
+     *********************/
+    let state = loadState();
+
+    // 缓存 DOM
+    const $ = (sel) => document.querySelector(sel);
+
+    // 页脚年份
+    $('#year').textContent = new Date().getFullYear();
+
+    // 区域1：明日方舟
+    const akInputs = {
+      YS: $('#ak_YS'),
+      OR: $('#ak_OR'),
+      T10: $('#ak_T10'),
+      T1: $('#ak_T1'),
+      total: $('#ak_total'),
+      detail: $('#ak_detail')
+    };
+
+    function calcAK() {
+      const YS = toNum(akInputs.YS.value);
+      const OR = toNum(akInputs.OR.value);
+      const T10 = toNum(akInputs.T10.value);
+      const T1 = toNum(akInputs.T1.value);
+      const pulls = ((YS + OR * 180) / 600) + T1 + (T10 * 10);
+      akInputs.total.textContent = pulls.toFixed(2);
+      akInputs.detail.textContent = `${YS}+${OR}*180)/600 + ${T1} + ${T10}*10`;
+      state.arknights = { YS, OR, T10, T1 };
+      saveState();
+    }
+
+    // 区域2：星穹铁道
+    const hsrInputs = {
+      SC: $('#hsr_SC'),
+      T: $('#hsr_T'),
+      total: $('#hsr_total'),
+      detail: $('#hsr_detail')
+    };
+
+    function calcHSR() {
+      const SC = toNum(hsrInputs.SC.value);
+      const T = toNum(hsrInputs.T.value);
+      const pulls = T + (SC / 160);
+      hsrInputs.total.textContent = pulls.toFixed(2);
+      hsrInputs.detail.textContent = `${T} + ${SC}/160`;
+      state.hsr = { SC, T };
+      saveState();
+    }
+
+    // 工具函数
+    function toNum(v) { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; }
+    function onInput(el, fn) { el.addEventListener('input', fn); el.addEventListener('change', fn); }
+
+    // 恢复数据到 UI（AK & HSR）
+    function restoreSimple() {
+      const { YS, OR, T10, T1 } = state.arknights;
+      akInputs.YS.value = YS; akInputs.OR.value = OR; akInputs.T10.value = T10; akInputs.T1.value = T1; calcAK();
+      const { SC, T } = state.hsr;
+      hsrInputs.SC.value = SC; hsrInputs.T.value = T; calcHSR();
+    }
+
+    // 绑定事件（AK & HSR）
+    onInput(akInputs.YS, calcAK); onInput(akInputs.OR, calcAK); onInput(akInputs.T10, calcAK); onInput(akInputs.T1, calcAK);
+    onInput(hsrInputs.SC, calcHSR); onInput(hsrInputs.T, calcHSR);
+
+    /*********************
+     * 区域3：奇迹暖暖活动
+     *********************/
+    const activitySelect = $('#activitySelect');
+    const activityNameInput = $('#activityNameInput');
+    const activityList = $('#activityList');
+
+    function refreshActivitySelect() {
+      const sel = activitySelect;
+      const current = sel.value;
+      sel.innerHTML = '<option value="" disabled selected>— 选择一个活动 —</option>';
+      state.nikki.activities.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = a.name;
+        sel.appendChild(opt);
+      });
+      // 尝试保留当前选中
+      if (state.nikki.activities.some(a => a.id === current)) sel.value = current;
+    }
+
+    function addActivity(name) {
+      name = (name || '').trim();
+      if (!name) name = `未命名活动 ${Math.floor(Math.random() * 1000)}`;
+      const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
+      // 默认截止时间：北京时区，当前时间 + 7 天，四舍五入到整点
+      const now = Date.now();
+      const roundedHourUTC = Math.floor((now + 3600000) / 3600000) * 3600000; // 向上取整到下一个整点
+      const defaultBjLocal = epochToBjLocalString(roundedHourUTC + 7 * 86400000);
+      const deadlineEpoch = bjLocalStringToEpoch(defaultBjLocal);
+
+      const a = { id, name, deadlineEpoch, current: 0, target: 0, perRun: 1 };
+      state.nikki.activities.push(a);
+      saveState();
+      renderActivities();
+      refreshActivitySelect();
+      activitySelect.value = id;
+    }
+
+    function deleteActivityById(id) {
+      const idx = state.nikki.activities.findIndex(a => a.id === id);
+      if (idx >= 0) {
+        state.nikki.activities.splice(idx, 1);
+        saveState();
+        renderActivities();
+        refreshActivitySelect();
+      }
+    }
+
+    function renderActivities() {
+      activityList.innerHTML = '';
+      if (state.nikki.activities.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'fine';
+        empty.textContent = '还没有活动，先在上方输入名称后点击「增加」。';
+        activityList.appendChild(empty);
+        return;
+      }
+
+      state.nikki.activities.forEach(a => {
+        const wrap = document.createElement('div');
+        wrap.className = 'activity';
+
+        const header = document.createElement('div');
+        header.className = 'header';
+        header.innerHTML = `<div class="flex"><strong>当前活动：${escapeHtml(a.name)}</strong></div>`;
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '删除';
+        delBtn.className = 'btn-danger';
+        delBtn.addEventListener('click', () => deleteActivityById(a.id));
+        header.appendChild(delBtn);
+        wrap.appendChild(header);
+
+        // 行：截止时间（北京）
+        const deadlineRow = document.createElement('div');
+        deadlineRow.className = 'row';
+        const deadlineLabel = document.createElement('label');
+        deadlineLabel.textContent = '活动截止时间（北京时间）';
+        const deadlineInput = document.createElement('input');
+        deadlineInput.type = 'datetime-local';
+        deadlineInput.value = epochToBjLocalString(a.deadlineEpoch);
+        deadlineInput.addEventListener('change', () => {
+          a.deadlineEpoch = bjLocalStringToEpoch(deadlineInput.value);
+          saveState();
+        });
+        deadlineRow.appendChild(deadlineLabel);
+        deadlineRow.appendChild(deadlineInput);
+        wrap.appendChild(deadlineRow);
+
+        // 行：已有 / 目标
+        const curRow = document.createElement('div'); curRow.className = 'row';
+        const curLabel = document.createElement('label'); curLabel.textContent = '目前已有道具数量';
+        const curInput = document.createElement('input'); curInput.type = 'number'; curInput.min = '0'; curInput.step = '1'; curInput.placeholder = '0'; curInput.value = a.current;
+        curInput.addEventListener('input', () => { a.current = toNum(curInput.value); saveState(); updateComputed(); });
+        curRow.appendChild(curLabel); curRow.appendChild(curInput); wrap.appendChild(curRow);
+
+        const tgtRow = document.createElement('div'); tgtRow.className = 'row';
+        const tgtLabel = document.createElement('label'); tgtLabel.textContent = '活动目标道具数量';
+        const tgtInput = document.createElement('input'); tgtInput.type = 'number'; tgtInput.min = '0'; tgtInput.step = '1'; tgtInput.placeholder = '0'; tgtInput.value = a.target;
+        tgtInput.addEventListener('input', () => { a.target = toNum(tgtInput.value); saveState(); updateComputed(); });
+        tgtRow.appendChild(tgtLabel); tgtRow.appendChild(tgtInput); wrap.appendChild(tgtRow);
+
+        // 倒计时 + 每天需要
+        const stat = document.createElement('div');
+        stat.className = 'total';
+        const cdSpan = document.createElement('span');
+        const perDaySpan = document.createElement('div'); perDaySpan.className = 'detail';
+        stat.appendChild(document.createTextNode('倒计时还有：'));
+        stat.appendChild(cdSpan);
+        stat.appendChild(perDaySpan);
+        wrap.appendChild(stat);
+
+        // 行：一次可获得道具数量
+        const prRow = document.createElement('div'); prRow.className = 'row';
+        const prLabel = document.createElement('label'); prLabel.textContent = '一次可获得道具数量';
+        const prInput = document.createElement('input'); prInput.type = 'number'; prInput.min = '0'; prInput.step = '1'; prInput.placeholder = '0'; prInput.value = a.perRun;
+        prInput.addEventListener('input', () => { a.perRun = toNum(prInput.value); saveState(); updateComputed(); });
+        prRow.appendChild(prLabel); prRow.appendChild(prInput); wrap.appendChild(prRow);
+
+        // 预计次数
+        const more = document.createElement('div');
+        more.className = 'total';
+        const needRunSpan = document.createElement('span');
+        const perDayRunSpan = document.createElement('div'); perDayRunSpan.className = 'detail';
+        more.appendChild(document.createTextNode('预计还需要 '));
+        more.appendChild(needRunSpan);
+        more.appendChild(document.createTextNode(' 次'));
+        more.appendChild(perDayRunSpan);
+        wrap.appendChild(more);
+
+        activityList.appendChild(wrap);
+
+        function updateComputed() {
+          const msLeft = a.deadlineEpoch - Date.now();
+          const { text, cls } = formatCountdown(msLeft);
+          cdSpan.textContent = text;
+          cdSpan.className = cls + ' num';
+
+          const remaining = Math.max(0, toNum(a.target) - toNum(a.current));
+          const daysLeft = Math.max(1, Math.ceil(msLeft / 86400000));
+          const perDay = remaining / daysLeft; // 按要求不取整
+          perDaySpan.textContent = `预计每天需要道具：${fmt(perDay)} （剩余天数=${daysLeft}）`;
+
+          const perRun = Math.max(0, toNum(a.perRun));
+          const needRuns = perRun > 0 ? (remaining / perRun) : Infinity;
+          needRunSpan.textContent = isFinite(needRuns) ? fmt(needRuns) : '∞';
+          const perDayRuns = isFinite(needRuns) ? (needRuns / daysLeft) : Infinity;
+          perDayRunSpan.textContent = `每天需要次数：${isFinite(perDayRuns) ? fmt(perDayRuns) : '∞'}`;
+        }
+
+        // 首次刷新 & 加入全局更新队列
+        updateComputed();
+        tickerTasks.push(updateComputed);
+      });
+    }
+
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+    function fmt(n) { return (Math.round(n * 100) / 100).toFixed(2); }
+
+    // 活动控制按钮
+    $('#addActivityBtn').addEventListener('click', () => {
+      addActivity(activityNameInput.value);
+      activityNameInput.value = '';
+      activityNameInput.focus();
+    });
+
+    $('#deleteSelectedActivityBtn').addEventListener('click', () => {
+      const id = activitySelect.value;
+      if (!id) return;
+      if (confirm('确认删除所选活动？')) deleteActivityById(id);
+    });
+
+    // 渲染 & 恢复
+    restoreSimple();
+    renderActivities();
+    refreshActivitySelect();
+
+    // 顶部：导出 / 导入 / 清空
+    $('#exportBtn').addEventListener('click', () => {
+      const ts = new Date().toISOString().replace(/[:.]/g, '-');
+      download(`个人游戏小工具-导出-${ts}.json`, JSON.stringify(state, null, 2));
+    });
+
+    $('#importFile').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        state = deepMerge(structuredClone(initialState), data);
+        saveState();
+        restoreSimple();
+        renderActivities();
+        refreshActivitySelect();
+        alert('导入成功');
+      } catch (err) {
+        console.error(err);
+        alert('导入失败：文件格式不正确');
+      } finally {
+        e.target.value = '';
+      }
+    });
+
+    $('#clearBtn').addEventListener('click', () => {
+      if (!confirm('这将清空所有本地数据，且不可恢复。是否继续？')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      state = structuredClone(initialState);
+      restoreSimple();
+      renderActivities();
+      refreshActivitySelect();
+    });
+
+    // 全局计时器：每秒刷新所有活动倒计时
+    const tickerTasks = [];
+    setInterval(() => { tickerTasks.forEach(fn => fn()); }, 1000);
+  </script>
+</body>
+</html>
