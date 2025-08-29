@@ -810,8 +810,18 @@
       const cardTotalPulls = (gd.cardSource * gd.unit + gd.cardExtra * gd.cardDays) / gd.pullUnit;
       const g648TotalPulls = (gd.g648Count * gd.unit) / gd.pullUnit;
 
-      gachaCardTotal.textContent = `对比月卡：${gd.cardPrice}元 / ${gd.cardSource}${gd.cardLabel} + (${gd.cardExtra}${gd.cardLabel}*${gd.cardDays}天) 共${cardTotalPulls.toFixed(2)}抽 每抽=${(gd.cardPrice / cardTotalPulls).toFixed(2)}元`;
-      gacha648Total.textContent = `对比648：${gd.g648Count}${gd.cardLabel} 共${g648TotalPulls.toFixed(2)}抽 每抽=${(648 / g648TotalPulls).toFixed(2)}元`;
+      // 修正月卡描述
+      let cardDesc = '';
+      if (currentGame === 'ak') {
+        cardDesc = `${gd.cardPrice}元 / ${gd.cardSource}合成源石 + (${gd.cardExtra}合成玉*${gd.cardDays}天)`;
+      } else if (currentGame === 'hsr') {
+        cardDesc = `${gd.cardPrice}元 / ${gd.cardSource}星琼 + (${gd.cardExtra}星琼*${gd.cardDays}天)`;
+      } else {
+        cardDesc = `${gd.cardPrice}元 / ${gd.cardSource}${gd.cardLabel} + (${gd.cardExtra}${gd.cardLabel}*${gd.cardDays}天)`;
+      }
+
+      gachaCardTotal.textContent = `${cardDesc} 共${cardTotalPulls.toFixed(2)}抽 每抽=${(gd.cardPrice / cardTotalPulls).toFixed(2)}元`;
+      gacha648Total.textContent = `${gd.g648Count}${gd.cardLabel} 共${g648TotalPulls.toFixed(2)}抽 每抽=${(648 / g648TotalPulls).toFixed(2)}元`;
 
       // 性价比
       const operator = gachaNeedOther.checked ? '高于' : '等于';
