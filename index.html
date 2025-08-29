@@ -801,9 +801,9 @@
         totalPulls = pullCount + (itemCount / 160);
       }
 
-      const perPullPrice = totalPulls > 0 ? (price / totalPulls).toFixed(2) : 0;
+      const perPullPrice = totalPulls > 0 ? (price / totalPulls) : 0;
       gachaTotalPulls.textContent = totalPulls.toFixed(2);
-      gachaPerPull.textContent = perPullPrice;
+      gachaPerPull.textContent = perPullPrice > 0 ? perPullPrice.toFixed(2) : '0';
 
       // 对比月卡和648
       const gd = gameData[currentGame];
@@ -823,10 +823,13 @@
       gachaCardTotal.textContent = `${cardDesc} 共${cardTotalPulls.toFixed(2)}抽 每抽=${(gd.cardPrice / cardTotalPulls).toFixed(2)}元`;
       gacha648Total.textContent = `${gd.g648Count}${gd.cardLabel} 共${g648TotalPulls.toFixed(2)}抽 每抽=${(648 / g648TotalPulls).toFixed(2)}元`;
 
-      // 性价比
+      // 性价比百分比修正
       const operator = gachaNeedOther.checked ? '高于' : '等于';
-      gachaCardPercent.textContent = totalPulls > 0 ? `${operator}月卡的 ${(totalPulls / cardTotalPulls * 100).toFixed(2)}%` : '0%';
-      gacha648Percent.textContent = totalPulls > 0 ? `${operator} 648的 ${(totalPulls / g648TotalPulls * 100).toFixed(2)}%` : '0%';
+      const cardPerPull = gd.cardPrice / cardTotalPulls;
+      const g648PerPull = 648 / g648TotalPulls;
+
+      gachaCardPercent.textContent = perPullPrice > 0 ? `${operator}月卡的 ${(cardPerPull / perPullPrice * 100).toFixed(2)}%` : '0%';
+      gacha648Percent.textContent = perPullPrice > 0 ? `${operator} 648的 ${(g648PerPull / perPullPrice * 100).toFixed(2)}%` : '0%';
     }
 
     // 恢复数据
