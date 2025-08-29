@@ -767,10 +767,10 @@
 
       // 计算总抽数
       const totalPulls = pullCount + ((a * ratioB) / bPerPull);
-      const perPullPrice = totalPulls > 0 ? (price / totalPulls).toFixed(2) : '0';
+      const perPullPrice = totalPulls > 0 ? (price / totalPulls) : 0;
 
       gachaTotalPulls.textContent = totalPulls.toFixed(2);
-      gachaPerPull.textContent = perPullPrice;
+      gachaPerPull.textContent = perPullPrice > 0 ? perPullPrice.toFixed(2) : '0';
 
       // 对比月卡和648 
       const cardA = parseFloat(document.getElementById('otherCardA').value) || 0;
@@ -779,13 +779,17 @@
       const g648A = parseFloat(document.getElementById('other648A').value) || 0;
       const g648TotalPulls = (g648A * ratioB) / bPerPull;
 
-      gachaCardTotal.textContent = `对比月卡：${cardA} 个氪金代币a  + ${cardB}个代币b *30天 共 ${cardTotalPulls.toFixed(2)} 抽 每抽= ${(price / cardTotalPulls).toFixed(2)} 元`;
-      gacha648Total.textContent = `对比648： ${g648A}个氪金代币a 共  ${g648TotalPulls.toFixed(2)}  抽 每抽= ${(648 / g648TotalPulls).toFixed(2)} 元`;
+      // 月卡和648每抽价格
+      const cardPerPull = cardTotalPulls > 0 ? (30 / cardTotalPulls) : 0;
+      const g648PerPull = g648TotalPulls > 0 ? (648 / g648TotalPulls) : 0;
 
-      // 性价比
+      gachaCardTotal.textContent = `${cardA} 个氪金代币a  + ${cardB}个代币b *30天 共 ${cardTotalPulls.toFixed(2)} 抽 每抽= ${(cardPerPull > 0 ? cardPerPull.toFixed(2) : '0')} 元`;
+      gacha648Total.textContent = ` ${g648A}个氪金代币a 共  ${g648TotalPulls.toFixed(2)}  抽 每抽= ${(g648PerPull > 0 ? g648PerPull.toFixed(2) : '0')} 元`;
+
+      // 性价比百分比修正
       const operator = gachaNeedOther.checked ? '高于' : '等于';
-      gachaCardPercent.textContent = totalPulls > 0 ? `${operator} ${(totalPulls / cardTotalPulls * 100).toFixed(2)}%` : '0%';
-      gacha648Percent.textContent = totalPulls > 0 ? `${operator} ${(totalPulls / g648TotalPulls * 100).toFixed(2)}%` : '0%';
+      gachaCardPercent.textContent = perPullPrice > 0 && cardPerPull > 0 ? `${operator}月卡的 ${(cardPerPull / perPullPrice * 100).toFixed(2)}%` : '0%';
+      gacha648Percent.textContent = perPullPrice > 0 && g648PerPull > 0 ? `${operator} 648的 ${(g648PerPull / perPullPrice * 100).toFixed(2)}%` : '0%';
     }
     // 主更新函数
     function updateGacha() {
