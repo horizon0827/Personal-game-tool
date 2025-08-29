@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,64 +17,388 @@
       --ok: #2ecc71;
       --warn: #f1c40f;
       --border: #1e2a3a;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --shadow: 0 10px 30px rgba(0, 0, 0, .35);
       --radius: 16px;
     }
-    html, body { background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
-    * { box-sizing: border-box; }
-    .container { max-width: 1100px; margin: 32px auto; padding: 0 16px; }
-    header { display:flex; flex-wrap:wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    header h1 { font-size: clamp(22px, 3vw, 30px); margin: 0; letter-spacing: .5px; }
-    header .actions { display:flex; gap: 8px; flex-wrap: wrap; }
-    button, .btn { cursor: pointer; background: linear-gradient(180deg,#1b2738,#101827); border: 1px solid var(--border); color: var(--fg); padding: 10px 14px; border-radius: 12px; box-shadow: var(--shadow); transition: transform .05s ease, filter .2s ease; font-weight: 600; }
-    button:hover { filter: brightness(1.05); }
-    button:active { transform: translateY(1px); }
-    .btn-secondary { background: #0f1624; }
-    .btn-danger { background: #2a1214; border-color: #5a1e22; color: #ffb3b3 }
 
-    .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
-    .card { grid-column: span 12; background: linear-gradient(180deg, #101827, #0f1522); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
-    @media (min-width: 980px) {
-      .card { grid-column: span 6; }
-      .card.full { grid-column: span 12; }
+    html,
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
     }
-    .card h2 { margin: 0 0 12px; font-size: 20px; display:flex; align-items:center; gap:8px }
-    .subtitle { color: var(--muted); font-size: 12px; margin-top: -4px; margin-bottom: 10px; }
 
-    .row { display:grid; grid-template-columns: repeat(12,1fr); gap: 10px; align-items: center; margin-bottom: 10px; }
-    .row > label { grid-column: span 4; color: var(--muted); font-size: 14px; }
-    .row > input, .row > select { grid-column: span 8; }
-    input[type="number"], input[type="text"], input[type="datetime-local"], select { width: 100%; background: #0b1220; border: 1px solid var(--border); color: var(--fg); padding: 10px 12px; border-radius: 12px; outline: none; }
-    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .total { margin-top: 10px; font-size: 16px; font-weight: 700; letter-spacing: .2px; }
-    .total .num { color: var(--accent-2); }
-    .total .detail { color: var(--muted); font-weight: 500; font-size: 12px; }
+    * {
+      box-sizing: border-box;
+    }
 
-    .hr { height: 1px; background: var(--border); margin: 12px 0; border-radius: 1px; }
+    .container {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
 
-    .activity-controls { display:grid; grid-template-columns: 1fr 1fr 1fr auto auto; gap: 8px; align-items: center; margin-bottom: 12px; }
-    .activity-list { display:grid; gap: 12px; }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
 
-    .activity { border: 1px dashed #2a3a55; border-radius: 14px; padding: 14px; background: #0c1322; }
-    .activity .header { display:flex; flex-wrap: wrap; align-items:center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-    .badge { font-size: 12px; color: #9cb3c7; background: #0c1a2a; padding: 4px 8px; border: 1px solid #203048; border-radius: 999px; }
-    .overdue { color: var(--danger); }
-    .soon { color: var(--warn); }
-    .ok { color: var(--ok); }
+    header h1 {
+      font-size: clamp(22px, 3vw, 30px);
+      margin: 0;
+      letter-spacing: .5px;
+    }
 
-    .fine { font-size: 12px; color: var(--muted); }
-    footer { margin-top: 24px; text-align: center; color: var(--muted); font-size: 12px; }
-    .muted { color: var(--muted); }
-    .flex { display:flex; gap: 8px; flex-wrap: wrap; align-items:center; }
+    header .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
-    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    button,
+    .btn {
+      cursor: pointer;
+      background: linear-gradient(180deg, #1b2738, #101827);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      padding: 10px 14px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      transition: transform .05s ease, filter .2s ease;
+      font-weight: 600;
+    }
 
-    .toolbar { display:flex; gap: 8px; align-items:center; flex-wrap: wrap; }
-    input[type="file"] { display:none; }
-    .file-label { border: 1px dashed var(--border); padding: 10px 12px; border-radius: 12px; cursor: pointer; }
+    button:hover {
+      filter: brightness(1.05);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-secondary {
+      background: #0f1624;
+    }
+
+    .btn-danger {
+      background: #2a1214;
+      border-color: #5a1e22;
+      color: #ffb3b3
+    }
+
+    /* ...existing code... */
+
+    /* 区域3：选择游戏按钮，紧凑排列，样式同增加按钮 */
+    #gachaCard .game-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 0;
+    }
+
+    #gachaCard .game-btns button {
+      background: linear-gradient(180deg, #1b2738, #101827);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      padding: 8px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      box-shadow: var(--shadow);
+      transition: transform .05s ease, filter .2s ease;
+      cursor: pointer;
+    }
+
+    #gachaCard .game-btns button.active,
+    #gachaCard .game-btns button:focus {
+      border-color: var(--accent);
+      color: var(--accent-2);
+    }
+
+    /* 区域3：礼包清空按钮，样式同删除 */
+    #gachaCard .gacha-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      align-items: center;
+      grid-column: span 12;
+
+    }
+
+    #gachaCard .gacha-actions button {
+      background: #2a1214;
+      border: 1px solid #5a1e22;
+      color: #ffb3b3;
+      padding: 8px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform .05s ease, filter .2s ease;
+    }
+
+    #gachaCard .gacha-actions button:hover {
+      filter: brightness(1.05);
+    }
+
+    #gachaCard .gacha-actions button:active {
+      transform: translateY(1px);
+    }
+        /* ...existing code... */
+    #gachaCard .row > label {
+      grid-column: span 3;
+      min-width: 70px;
+    }
+    #gachaCard .row > .game-btns {
+      grid-column: span 9;
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+    /* ...existing code... */
+    /* ...existing code... */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      grid-column: span 12;
+      background: linear-gradient(180deg, #101827, #0f1522);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    @media (min-width: 980px) {
+      .card {
+        grid-column: span 6;
+      }
+
+      .card.full {
+        grid-column: span 12;
+      }
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: -4px;
+      margin-bottom: 10px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .row>label {
+      grid-column: span 4;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .row>input,
+    .row>select {
+      grid-column: span 8;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    input[type="datetime-local"],
+    select {
+      width: 100%;
+      background: #0b1220;
+      border: 1px solid var(--border);
+      color: var(--fg);
+      padding: 10px 12px;
+      border-radius: 12px;
+      outline: none;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .total {
+      margin-top: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    .total .num {
+      color: var(--accent-2);
+    }
+
+    .total .detail {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 12px;
+    }
+
+    .hr {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+      border-radius: 1px;
+    }
+
+    .activity-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .activity-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .activity {
+      border: 1px dashed #2a3a55;
+      border-radius: 14px;
+      padding: 14px;
+      background: #0c1322;
+    }
+
+    .activity .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      font-size: 12px;
+      color: #9cb3c7;
+      background: #0c1a2a;
+      padding: 4px 8px;
+      border: 1px solid #203048;
+      border-radius: 999px;
+    }
+
+    .overdue {
+      color: var(--danger);
+    }
+
+    .soon {
+      color: var(--warn);
+    }
+
+    .ok {
+      color: var(--ok);
+    }
+
+    .fine {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .flex {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-label {
+      border: 1px dashed var(--border);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    #gachaCard input[type="number"],
+    #gachaCard input[type="text"] {
+      max-width: 110px;
+      min-width: 60px;
+      padding: 6px 8px;
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    #gachaCard .row {
+      gap: 6px;
+    }
+
+    #gachaCard label {
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    #gachaCard .flex-inputs {
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    #gachaCard .flex-inputs input[type="number"] {
+      max-width: 60px;
+      min-width: 40px;
+      padding: 4px 6px;
+      font-size: 13px;
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
     <header>
@@ -126,9 +451,72 @@
           <div class="detail">计算：(<span id="hsr_detail" class="mono">0</span>)</div>
         </div>
       </section>
+      <!-- 区域3：氪金礼包计算器 -->
+      <section class="card" id="gachaCard">
+        <h2>氪金礼包计算器</h2>
+        <div class="row">
+          <label>选择游戏</label>
+          <div class="game-btns">
+            <button data-game="ak">明日方舟</button>
+            <button data-game="hsr">崩坏：星穹铁道</button>
+            <button data-game="other">其他</button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="gacha-actions">
+            <button id="clearGachaBtn">清空礼包数据</button>
+            <button id="clearAllGachaBtn">清空所有</button>
+          </div>
+        </div>
+        <div class="row">
+          <label>价格 (RMB)</label>
+          <input id="gachaPrice" type="number" min="0" step="0.01" />
+        </div>
+        <div class="row">
+          <label id="gachaItemLabel">包含道具</label>
+          <input id="gachaItemCount" type="number" min="0" step="1" />
+        </div>
+        <div class="row">
+          <label>包含抽数</label>
+          <input id="gachaPullCount" type="number" min="0" step="1" />
+        </div>
+        <div class="row">
+          <label for="gachaNeedOther" style="display:flex;align-items:center;gap:8px;">
+            是否有其他需求道具
+            <input id="gachaNeedOther" type="checkbox" style="margin-left:8px;" />
+          </label>
+        </div>
 
-      <!-- 区域3：活动计算器（整卡宽度） -->
-      <section class="card full" id="nikkiCard">
+
+        <div class="total">总计抽数: <span id="gachaTotalPulls" class="num">0</span> 每抽=<span id="gachaPerPull"
+            class="num">0</span>元</div>
+
+
+        <div class="total" id="gachaCardTotalContainer">
+          对比月卡：<span id="gachaCardTotal" class="num">0</span>
+          <span id="gachaCardPercent" class="num" style="margin-left:12px;">= </span>
+        </div>
+        <div class="total" id="gacha648TotalContainer">
+          对比648：<span id="gacha648Total" class="num">0</span>
+          <span id="gacha648Percent" class="num" style="margin-left:12px;">= </span>
+        </div>
+
+
+        <div class="total flex-inputs" id="otherCardInput" style="display:none;">
+          月卡: <input id="otherCardA" type="number" placeholder="A">个氪金代币a + <input id="otherCardB" type="number"
+            placeholder="B">个代币b *30天
+        </div>
+        <div class="total flex-inputs" id="other648Input" style="display:none;">
+          648: <input id="other648A" type="number" placeholder="A">个氪金代币a
+        </div>
+        <div class="total flex-inputs" id="otherRatioInput" style="display:none;">
+          1氪金代币a = <input id="otherRatioB" type="number" placeholder="B">代币b ; <input id="otherBPerPull" type="number"
+            placeholder="B">代币b=1抽
+        </div>
+      </section>
+
+      <!-- 区域4：活动计算器 -->
+      <section class="card" id="nikkiCard">
         <h2>活动计算器</h2>
         <div class="hint">时间默认为<b>中国北京时间（UTC+8）</b>。倒计时以当前设备时间为准。</div>
 
@@ -169,7 +557,7 @@
       arknights: { YS: 0, OR: 0, T10: 0, T1: 0 },
       hsr: { SC: 0, T: 0 },
       nikki: {
-        activities: [ /* { id, name, deadlineEpoch, current, target, perRun } */ ]
+        activities: [ /* { id, name, deadlineEpoch, current, target, perRun } */]
       }
     };
 
@@ -318,8 +706,144 @@
     onInput(akInputs.YS, calcAK); onInput(akInputs.OR, calcAK); onInput(akInputs.T10, calcAK); onInput(akInputs.T1, calcAK);
     onInput(hsrInputs.SC, calcHSR); onInput(hsrInputs.T, calcHSR);
 
+
     /*********************
-     * 区域3：奇迹暖暖活动
+    * 区域3：氪金计算器
+    *********************/
+    const gachaPrice = document.getElementById('gachaPrice');//礼包价格
+    const gachaItemCount = document.getElementById('gachaItemCount');//礼包内道具数量
+    const gachaTotalPulls = document.getElementById('gachaTotalPulls');//总抽数
+    const gachaPerPull = document.getElementById('gachaPerPull');//每抽价格
+    const gachaNeedOther = document.getElementById('gachaNeedOther');//是否有其他需求道具
+    const gachaItemLabel = document.getElementById('gachaItemLabel');// 道具标签
+    const gachaCardTotal = document.getElementById('gachaCardTotal');//对比月卡
+    const gacha648Total = document.getElementById('gacha648Total');//对比648
+    const gachaCardPercent = document.getElementById('gachaCardPercent');//性价比（月卡）
+    const gacha648Percent = document.getElementById('gacha648Percent');//性价比（648）
+    const gachaPullCount = document.getElementById('gachaPullCount'); // 新增礼包抽数输入框
+
+    const otherCardInput = document.getElementById('otherCardInput');
+    const other648Input = document.getElementById('other648Input');
+    const otherRatioInput = document.getElementById('otherRatioInput');
+
+
+    const gameButtons = document.querySelectorAll('#gachaCard button[data-game]');
+    let currentGame = 'other';
+
+
+    const gameData = {
+      ak: { cardLabel: '合成源石', unit: 180, pullUnit: 600, cardPrice: 30, cardSource: 6, cardExtra: 200, cardDays: 30, g648Count: 130 },
+      hsr: { cardLabel: '星琼', unit: 1, pullUnit: 160, cardPrice: 30, cardSource: 300, cardExtra: 90, cardDays: 30, g648Count: 6480 },
+      other: { cardLabel: '氪金代币a' }
+    };
+
+    gameButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentGame = btn.dataset.game;
+        const gd = gameData[currentGame];
+        gachaItemLabel.textContent = gd ? gd.cardLabel : gameData.other.cardLabel;
+        if (currentGame === 'other') {
+          otherCardInput.style.display = 'flex';
+          other648Input.style.display = 'flex';
+          otherRatioInput.style.display = 'flex';
+          ['otherCardA', 'otherCardB', 'other648A', 'otherRatioB', 'otherBPerPull'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateGachaOther);
+          });
+        } else {
+          otherCardInput.style.display = 'none';
+          other648Input.style.display = 'none';
+          otherRatioInput.style.display = 'none';
+        }
+        updateGacha();
+      });
+    });
+
+    function updateGachaOther() {
+      const price = parseFloat(gachaPrice.value) || 0;
+      const pullCount = parseFloat(gachaPullCount.value) || 0; // 礼包自带抽数
+      const a = parseFloat(document.getElementById('gachaItemCount').value) || 0; // 氪金代币A数量（礼包内）
+      const ratioB = parseFloat(document.getElementById('otherRatioB').value) || 1; // 1A=多少B
+      const bPerPull = parseFloat(document.getElementById('otherBPerPull').value) || 1; // 每抽所需B
+
+      // 计算总抽数
+      const totalPulls = pullCount + ((a * ratioB) / bPerPull);
+      const perPullPrice = totalPulls > 0 ? (price / totalPulls).toFixed(2) : '0';
+
+      gachaTotalPulls.textContent = totalPulls.toFixed(2);
+      gachaPerPull.textContent = perPullPrice;
+
+      // 对比月卡和648 
+      const cardA = parseFloat(document.getElementById('otherCardA').value) || 0;
+      const cardB = parseFloat(document.getElementById('otherCardB').value) || 0;
+      const cardTotalPulls = ((cardA * ratioB) + (cardB * 30)) / bPerPull;
+      const g648A = parseFloat(document.getElementById('other648A').value) || 0;
+      const g648TotalPulls = (g648A * ratioB) / bPerPull;
+
+      gachaCardTotal.textContent = `对比月卡：${cardA} 个氪金代币a  + ${cardB}个代币b *30天 共 ${cardTotalPulls.toFixed(2)} 抽 每抽= ${(price / cardTotalPulls).toFixed(2)} 元`;
+      gacha648Total.textContent = `对比648： ${g648A}个氪金代币a 共  ${g648TotalPulls.toFixed(2)}  抽 每抽= ${(648 / g648TotalPulls).toFixed(2)} 元`;
+
+      // 性价比
+      const operator = gachaNeedOther.checked ? '高于' : '等于';
+      gachaCardPercent.textContent = totalPulls > 0 ? `${operator} ${(totalPulls / cardTotalPulls * 100).toFixed(2)}%` : '0%';
+      gacha648Percent.textContent = totalPulls > 0 ? `${operator} ${(totalPulls / g648TotalPulls * 100).toFixed(2)}%` : '0%';
+    }
+    // 主更新函数
+    function updateGacha() {
+      if (currentGame === 'other') { updateGachaOther(); return; }
+      const price = parseFloat(gachaPrice.value) || 0;
+      const itemCount = parseFloat(gachaItemCount.value) || 0; // 合成源石/星琼数量
+      const pullCount = parseFloat(gachaPullCount.value) || 0; // 礼包自带抽数
+      let totalPulls = 0;
+
+      if (currentGame === 'ak') {
+        totalPulls = pullCount + (itemCount * 180 / 600);
+      } else if (currentGame === 'hsr') {
+        totalPulls = pullCount + (itemCount / 160);
+      }
+
+      const perPullPrice = totalPulls > 0 ? (price / totalPulls).toFixed(2) : 0;
+      gachaTotalPulls.textContent = totalPulls.toFixed(2);
+      gachaPerPull.textContent = perPullPrice;
+
+      // 对比月卡和648
+      const gd = gameData[currentGame];
+      const cardTotalPulls = (gd.cardSource * gd.unit + gd.cardExtra * gd.cardDays) / gd.pullUnit;
+      const g648TotalPulls = (gd.g648Count * gd.unit) / gd.pullUnit;
+
+      gachaCardTotal.textContent = `对比月卡：${gd.cardPrice}元 / ${gd.cardSource}${gd.cardLabel} + (${gd.cardExtra}${gd.cardLabel}*${gd.cardDays}天) 共${cardTotalPulls.toFixed(2)}抽 每抽=${(gd.cardPrice / cardTotalPulls).toFixed(2)}元`;
+      gacha648Total.textContent = `对比648：${gd.g648Count}${gd.cardLabel} 共${g648TotalPulls.toFixed(2)}抽 每抽=${(648 / g648TotalPulls).toFixed(2)}元`;
+
+      // 性价比
+      const operator = gachaNeedOther.checked ? '高于' : '等于';
+      gachaCardPercent.textContent = totalPulls > 0 ? `${operator}月卡的 ${(totalPulls / cardTotalPulls * 100).toFixed(2)}%` : '0%';
+      gacha648Percent.textContent = totalPulls > 0 ? `${operator} 648的 ${(totalPulls / g648TotalPulls * 100).toFixed(2)}%` : '0%';
+    }
+
+    // 恢复数据
+    [gachaPrice, gachaItemCount, gachaPullCount, gachaNeedOther].forEach(el => el.addEventListener('input', updateGacha));
+
+    // 初始化
+    document.getElementById('clearGachaBtn').addEventListener('click', () => {
+      gachaPrice.value = '';
+      gachaItemCount.value = '';
+      gachaPullCount.value = '';
+      gachaNeedOther.checked = false;
+      updateGacha();
+    });
+    //  清空所有数据
+    document.getElementById('clearAllGachaBtn').addEventListener('click', () => {
+      gachaPrice.value = '';
+      gachaItemCount.value = '';
+      gachaPullCount.value = '';
+      gachaNeedOther.checked = false;
+      updateGacha();
+      localStorage.clear();
+      location.reload();
+    });
+
+
+    /*********************
+     * 区域4：活动
      *********************/
     const activitySelect = $('#activitySelect');
     const activityNameInput = $('#activityNameInput');
@@ -474,7 +998,7 @@
       });
     }
 
-    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }[c])); }
     function fmt(n) { return (Math.round(n * 100) / 100).toFixed(2); }
 
     // 活动控制按钮
@@ -535,4 +1059,5 @@
     setInterval(() => { tickerTasks.forEach(fn => fn()); }, 1000);
   </script>
 </body>
+
 </html>
