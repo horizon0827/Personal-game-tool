@@ -971,21 +971,34 @@
         stat.appendChild(perDaySpan);
         wrap.appendChild(stat);
 
-        // 行：一次可获得道具数量
+        // 行：一次可获得道具数量 + 每次成本
         const prRow = document.createElement('div'); prRow.className = 'row';
         const prLabel = document.createElement('label'); prLabel.textContent = '一次可获得道具数量';
         const prInput = document.createElement('input'); prInput.type = 'number'; prInput.min = '0'; prInput.step = '1'; prInput.placeholder = '0'; prInput.value = a.perRun;
         prInput.addEventListener('input', () => { a.perRun = toNum(prInput.value); saveState(); updateComputed(); });
-        prRow.appendChild(prLabel); prRow.appendChild(prInput); wrap.appendChild(prRow);
+
+        const costLabel = document.createElement('label'); costLabel.textContent = '每次成本（钻/体力）';
+        costLabel.style.marginLeft = '12px';
+        const costInput = document.createElement('input'); costInput.type = 'number'; costInput.min = '0'; costInput.step = '0.01'; costInput.placeholder = '0'; costInput.value = a.perCost || '';
+        costInput.style.maxWidth = '90px';
+        costInput.addEventListener('input', () => { a.perCost = toNum(costInput.value); saveState(); updateComputed(); });
+
+        prRow.appendChild(prLabel);
+        prRow.appendChild(prInput);
+        prRow.appendChild(costLabel);
+        prRow.appendChild(costInput);
+        wrap.appendChild(prRow);
 
         // 预计次数
         const more = document.createElement('div');
         more.className = 'total';
         const needRunSpan = document.createElement('span');
+        const costSpan = document.createElement('span'); // 新增
         const perDayRunSpan = document.createElement('div'); perDayRunSpan.className = 'detail';
         more.appendChild(document.createTextNode('预计还需要 '));
         more.appendChild(needRunSpan);
         more.appendChild(document.createTextNode(' 次'));
+        more.appendChild(costSpan); // 新增
         more.appendChild(perDayRunSpan);
         wrap.appendChild(more);
 
@@ -1003,10 +1016,22 @@
           perDaySpan.textContent = `预计每天需要道具：${fmt(perDay)} （剩余天数=${daysLeft}）`;
 
           const perRun = Math.max(0, toNum(a.perRun));
+          const perCost = Math.max(0, toNum(a.perCost));
           const needRuns = perRun > 0 ? (remaining / perRun) : Infinity;
           needRunSpan.textContent = isFinite(needRuns) ? fmt(needRuns) : '∞';
+
+          // 预计总成本
+          if (isFinite(needRuns) && perCost > 0) {
+            costSpan.textContent = `，预计需要成本：${fmt(needRuns * perCost)}`;
+          } else {
+            costSpan.textContent = '';
+          }
+
           const perDayRuns = isFinite(needRuns) ? (needRuns / daysLeft) : Infinity;
-          perDayRunSpan.textContent = `每天需要次数：${isFinite(perDayRuns) ? fmt(perDayRuns) : '∞'}`;
+          perDayRunSpan.innerHTML = `每天需要次数：${isFinite(perDayRuns) ? fmt(perDayRuns) : '∞'}`;
+          if (isFinite(perDayRuns) && perCost > 0) {
+            perDayRunSpan.innerHTML += `，预计每天成本：${fmt(perDayRuns * perCost)}`;
+          }
         }
 
         // 首次刷新 & 加入全局更新队列
