@@ -150,18 +150,21 @@
     #gachaCard .gacha-actions button:active {
       transform: translateY(1px);
     }
-        /* ...existing code... */
-    #gachaCard .row > label {
+
+    /* ...existing code... */
+    #gachaCard .row>label {
       grid-column: span 3;
       min-width: 70px;
     }
-    #gachaCard .row > .game-btns {
+
+    #gachaCard .row>.game-btns {
       grid-column: span 9;
       display: flex;
       gap: 8px;
       flex-wrap: nowrap;
       align-items: center;
     }
+
     /* ...existing code... */
     /* ...existing code... */
     .grid {
@@ -521,15 +524,12 @@
         <div class="hint">时间默认为<b>中国北京时间（UTC+8）</b>。倒计时以当前设备时间为准。</div>
 
         <div class="activity-controls">
-          <select id="activitySelect" title="已创建的活动">
+          <select id="activitySelect" style="min-width:120px;">
             <option value="" disabled selected>— 选择一个活动 —</option>
           </select>
           <input id="activityNameInput" type="text" placeholder="新活动名称" />
           <button id="addActivityBtn">增加</button>
-          <button id="deleteSelectedActivityBtn" class="btn-danger">删除所选</button>
-          <span class="fine">（下拉选择 + 输入框 + 增加 / 删除）</span>
         </div>
-
         <div class="activity-list" id="activityList"></div>
 
         <div class="hint">说明：
@@ -548,6 +548,11 @@
   </div>
 
   <script>
+    // 全局计时器队列，必须放在最前面
+    const tickerTasks = [];
+    // 全局计时器：每秒刷新所有活动倒计时
+    setInterval(() => { tickerTasks.forEach(fn => fn()); }, 1000);
+
     /*********************
      * 通用：本地存储 & 导入导出
      *********************/
@@ -866,6 +871,40 @@
     const activityNameInput = $('#activityNameInput');
     const activityList = $('#activityList');
 
+    function addActivity(name) {
+      name = (name || '').trim();
+      if (!name) name = `未命名活动 ${Math.floor(Math.random() * 1000)}`;
+      const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
+      // 默认截止时间：北京时区，当前时间 + 7 天，四舍五入到整点
+      const now = Date.now();
+      const roundedHourUTC = Math.floor((now + 3600000) / 3600000) * 3600000;
+      const defaultBjLocal = epochToBjLocalString(roundedHourUTC + 7 * 86400000);
+      const deadlineEpoch = bjLocalStringToEpoch(defaultBjLocal);
+
+      const a = { id, name, deadlineEpoch, current: 0, target: 0, perRun: 1 };
+      state.nikki.activities.push(a);
+      saveState();
+      refreshActivitySelect();
+      activitySelect.value = id;      // 新增：自动选中新建的活动
+      renderActivities();
+    }
+
+    function deleteActivityById(id) {
+      const idx = state.nikki.activities.findIndex(a => a.id === id);
+      if (idx >= 0) {
+        state.nikki.activities.splice(idx, 1);
+        saveState();
+        refreshActivitySelect();
+        // 自动切换到下一个活动（如果有）
+        if (state.nikki.activities.length > 0) {
+          activitySelect.value = state.nikki.activities[0].id;
+        }
+        renderActivities();
+      }
+    }
+
+
+
     function refreshActivitySelect() {
       const sel = activitySelect;
       const current = sel.value;
@@ -880,34 +919,6 @@
       if (state.nikki.activities.some(a => a.id === current)) sel.value = current;
     }
 
-    function addActivity(name) {
-      name = (name || '').trim();
-      if (!name) name = `未命名活动 ${Math.floor(Math.random() * 1000)}`;
-      const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
-      // 默认截止时间：北京时区，当前时间 + 7 天，四舍五入到整点
-      const now = Date.now();
-      const roundedHourUTC = Math.floor((now + 3600000) / 3600000) * 3600000; // 向上取整到下一个整点
-      const defaultBjLocal = epochToBjLocalString(roundedHourUTC + 7 * 86400000);
-      const deadlineEpoch = bjLocalStringToEpoch(defaultBjLocal);
-
-      const a = { id, name, deadlineEpoch, current: 0, target: 0, perRun: 1 };
-      state.nikki.activities.push(a);
-      saveState();
-      renderActivities();
-      refreshActivitySelect();
-      activitySelect.value = id;
-    }
-
-    function deleteActivityById(id) {
-      const idx = state.nikki.activities.findIndex(a => a.id === id);
-      if (idx >= 0) {
-        state.nikki.activities.splice(idx, 1);
-        saveState();
-        renderActivities();
-        refreshActivitySelect();
-      }
-    }
-
     function renderActivities() {
       activityList.innerHTML = '';
       if (state.nikki.activities.length === 0) {
@@ -918,7 +929,18 @@
         return;
       }
 
-      state.nikki.activities.forEach(a => {
+      // 只显示选中的活动
+      const selectedId = activitySelect.value;
+      const showList = state.nikki.activities.filter(a => a.id === selectedId);
+      if (showList.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'fine';
+        empty.textContent = '请先在上方下拉菜单选择一个活动。';
+        activityList.appendChild(empty);
+        return;
+      }
+
+      showList.forEach(a => {
         const wrap = document.createElement('div');
         wrap.className = 'activity';
 
@@ -1050,16 +1072,13 @@
       activityNameInput.focus();
     });
 
-    $('#deleteSelectedActivityBtn').addEventListener('click', () => {
-      const id = activitySelect.value;
-      if (!id) return;
-      if (confirm('确认删除所选活动？')) deleteActivityById(id);
-    });
-
     // 渲染 & 恢复
     restoreSimple();
-    renderActivities();
     refreshActivitySelect();
+    if (state.nikki.activities.length > 0 && !activitySelect.value) {
+      activitySelect.value = state.nikki.activities[0].id;
+    }
+    renderActivities();
 
     // 顶部：导出 / 导入 / 清空
     $('#exportBtn').addEventListener('click', () => {
@@ -1096,9 +1115,13 @@
       refreshActivitySelect();
     });
 
+   
     // 全局计时器：每秒刷新所有活动倒计时
-    const tickerTasks = [];
     setInterval(() => { tickerTasks.forEach(fn => fn()); }, 1000);
+
+    activitySelect.addEventListener('change', () => {
+      renderActivities();
+    });
   </script>
 </body>
 
